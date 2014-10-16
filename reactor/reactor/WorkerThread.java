@@ -5,8 +5,8 @@ import reactorapi.*;
 public class WorkerThread<T> extends Thread {
 	private final EventHandler<T> handler;
 	private final BlockingEventQueue<Object> queue;
-
-	// Additional fields are allowed.
+	
+	private volatile boolean cancelled = false;
 
 	public WorkerThread(EventHandler<T> eh, BlockingEventQueue<Object> q) {
 		handler = eh;
@@ -14,10 +14,21 @@ public class WorkerThread<T> extends Thread {
 	}
 
 	public void run() {
-		// TODO: Implement WorkerThread.run().
+		while (!cancelled) {
+			final T value = handler.getHandle().read();
+			final Event<T> event = new Event<T>(value, handler);
+			try {
+				queue.put(event);
+			} catch (InterruptedException e) {
+				System.err.println("Worker thread got interrupted. Terminating...");
+				return;
+			}
+			if (value == null || interrupted())
+				return;
+		}
 	}
 
 	public void cancelThread() {
-		// TODO: Implement WorkerThread.cancelThread().
+		cancelled = true;
 	}
 }
