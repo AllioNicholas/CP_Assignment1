@@ -22,6 +22,7 @@ public class Dispatcher {
 
 	public void addHandler(EventHandler<?> h) {
 		// TODO: Implement Dispatcher.addHandler(EventHandler).
+		//hello
 	}
 
 	public void removeHandler(EventHandler<?> h) {
