@@ -8,7 +8,6 @@ public class Dispatcher {
 	private List<EventHandler<?>> eventHandlerList;
 	private BlockingEventQueue<Object> blockingQueue;
 	private List<WorkerThread<?>> workerThreadList;
-	private boolean hasHandlers = false;
 
 	public Dispatcher() {
 		this.blockingQueue = new BlockingEventQueue<>(10);
@@ -23,7 +22,7 @@ public class Dispatcher {
 	}
 
 	public void handleEvents() throws InterruptedException {
-		while (hasHandlers) {
+		while (eventHandlerList.size() > 0) {
 			Event<?> e = select();
 			if (eventHandlerList.contains(e.getHandler())) {
 				e.handle();
@@ -39,15 +38,13 @@ public class Dispatcher {
 	public void addHandler(EventHandler<?> h) {
 		WorkerThread<?> wThread = new WorkerThread<>(h, this.blockingQueue);
 		eventHandlerList.add(h);
+		workerThreadList.add(wThread);
 		wThread.start();
-		workerThreadList.add(eventHandlerList.indexOf(h), wThread);
-		hasHandlers = true;
 	}
 
 	public void removeHandler(EventHandler<?> h) {
 		int workerIndex = eventHandlerList.indexOf(h);
 		workerThreadList.get(workerIndex).cancelThread();
 		eventHandlerList.remove(h);
-		if(eventHandlerList.isEmpty()) hasHandlers = false;
 	}
 }

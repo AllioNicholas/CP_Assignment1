@@ -8,17 +8,17 @@ import java.util.List;
 import java.util.Queue;
 
 public class BlockingEventQueue<T> implements BlockingQueue<Event<? extends T>> {
-	private final Object PutLock = new Object();
 	private final Object GetLock = new Object();
+	private final Object PutLock = new Object();
 	private final Queue<Event<? extends T>> queue;
 	private final int capacity;
-	private volatile int size;
-	
+	private volatile int size = 0;
+
 	public BlockingEventQueue(final int capacity) {
-		assert(capacity > 0);
-		queue = new ArrayDeque<Event<? extends T>>(capacity);
+		if (capacity < 1)
+			throw new IllegalArgumentException("Capacity must be bigger than 0");
 		this.capacity = capacity;
-		this.size = 0;
+		queue = new ArrayDeque<Event<? extends T>>(capacity);
 	}
 
 	public int getSize() {
@@ -36,7 +36,8 @@ public class BlockingEventQueue<T> implements BlockingQueue<Event<? extends T>> 
 				GetLock.wait();
 			synchronized (this) {
 				event = queue.poll();
-				size = queue.size(); 
+				assert (event != null);
+				size = queue.size();
 			}
 		}
 		synchronized (PutLock) {
@@ -51,7 +52,7 @@ public class BlockingEventQueue<T> implements BlockingQueue<Event<? extends T>> 
 			synchronized (this) {
 				eventList = new ArrayList<Event<? extends T>>(queue);
 				queue.clear();
-				size = queue.size(); 
+				size = 0;
 			}
 		}
 		synchronized (PutLock) {
@@ -66,7 +67,7 @@ public class BlockingEventQueue<T> implements BlockingQueue<Event<? extends T>> 
 				PutLock.wait();
 			synchronized (this) {
 				queue.add(event);
-				size = queue.size(); 
+				size = queue.size();
 			}
 		}
 		synchronized (GetLock) {
