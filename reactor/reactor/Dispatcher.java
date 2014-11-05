@@ -43,8 +43,9 @@ public class Dispatcher {
 	}
 
 	public void removeHandler(EventHandler<?> h) {
-		int workerIndex = eventHandlerList.indexOf(h);
-		workerThreadList.get(workerIndex).cancelThread();
-		eventHandlerList.remove(h);
+		int index = eventHandlerList.indexOf(h);
+		workerThreadList.get(index).cancelThread();
+		workerThreadList.remove(index);
+		eventHandlerList.remove(index);
 	}
 }
