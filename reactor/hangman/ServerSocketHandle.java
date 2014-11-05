@@ -9,8 +9,9 @@ import reactorapi.Handle;
 public class ServerSocketHandle implements Handle<Socket> {
 	private final ServerSocket socket;
 	
-	public ServerSocketHandle(final int port) throws IOException {
-		socket = new ServerSocket(port);
+	public ServerSocketHandle() throws IOException {
+		socket = new ServerSocket(0);
+		System.out.println(socket.getLocalPort());
 	}
 
 	public Socket read() {

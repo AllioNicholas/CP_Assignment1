@@ -11,7 +11,6 @@ import reactorapi.EventHandler;
 import reactorapi.Handle;
 
 public class HangmanServer {
-	public static final int port = 30000;
 	private final Dispatcher dispatcher;
 	private final HangmanRules<PlayerHandle> rules;
 
@@ -30,7 +29,6 @@ public class HangmanServer {
 			System.out.println("The number of failed attempts must be at least 0");
 			return;
 		}
-		System.out.println(port);
 		HangmanServer server;
 		try {
 			server = new HangmanServer(word_to_guess, num_attempts);
@@ -46,7 +44,7 @@ public class HangmanServer {
 		this.dispatcher = new Dispatcher();
 		this.rules = new HangmanRules<PlayerHandle>(word, attempts); 
 		this.playerHandlers = new LinkedList<PlayerHandler>();
-		this.serverSocketHandler = new ServerSocketHandler(port);
+		this.serverSocketHandler = new ServerSocketHandler();
 		dispatcher.addHandler(serverSocketHandler);
 	}
 	
@@ -114,8 +112,8 @@ public class HangmanServer {
 	public class ServerSocketHandler implements EventHandler<Socket> {
 		private final ServerSocketHandle handle;
 		
-		public ServerSocketHandler(final int port) throws IOException {
-			handle = new ServerSocketHandle(port);
+		public ServerSocketHandler() throws IOException {
+			handle = new ServerSocketHandle();
 		}
 
 		public Handle<Socket> getHandle() {
