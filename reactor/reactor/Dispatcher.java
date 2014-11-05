@@ -10,13 +10,13 @@ public class Dispatcher {
 	private List<WorkerThread<?>> workerThreadList;
 
 	public Dispatcher() {
-		this.blockingQueue = new BlockingEventQueue<>(10);
+		this.blockingQueue = new BlockingEventQueue<Object>(10);
 		this.eventHandlerList = new LinkedList<EventHandler<?>>();
 		this.workerThreadList = new LinkedList<WorkerThread<?>>();
 	}
 
 	public Dispatcher(int capacity) {
-		this.blockingQueue = new BlockingEventQueue<>(capacity);
+		this.blockingQueue = new BlockingEventQueue<Object>(capacity);
 		this.eventHandlerList = new LinkedList<EventHandler<?>>();
 		this.workerThreadList = new LinkedList<WorkerThread<?>>();
 	}
@@ -35,14 +35,14 @@ public class Dispatcher {
 		return e;
 	}
 
-	public void addHandler(EventHandler<?> h) {
-		WorkerThread<?> wThread = new WorkerThread<>(h, this.blockingQueue);
+	public <T> void addHandler(EventHandler<T> h) {
+		WorkerThread<T> wThread = new WorkerThread<T>(h, this.blockingQueue);
 		eventHandlerList.add(h);
 		workerThreadList.add(wThread);
 		wThread.start();
 	}
 
-	public void removeHandler(EventHandler<?> h) {
+	public <T> void removeHandler(EventHandler<T> h) {
 		int index = eventHandlerList.indexOf(h);
 		workerThreadList.get(index).cancelThread();
 		workerThreadList.remove(index);
