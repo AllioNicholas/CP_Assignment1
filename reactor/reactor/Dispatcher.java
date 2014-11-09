@@ -1,6 +1,7 @@
 package reactor;
 
 import java.util.*;
+
 import reactorapi.*;
 
 public class Dispatcher {
@@ -21,6 +22,8 @@ public class Dispatcher {
 
 	public void handleEvents() throws InterruptedException {
 		while (eventHandlerList.size() > 0) {
+			if (Thread.interrupted())
+				throw new InterruptedException();
 			final Event<?> e = select();
 			if (eventHandlerList.contains(e.getHandler())) {
 				e.handle();
