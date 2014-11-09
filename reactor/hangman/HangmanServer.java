@@ -5,6 +5,7 @@ import hangmanrules.HangmanRules;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.List;
 
 import reactor.Dispatcher;
 import reactorapi.EventHandler;
@@ -14,9 +15,8 @@ public class HangmanServer {
 	private final Dispatcher dispatcher;
 	private final HangmanRules<PlayerHandle> rules;
 
-	// TODO: nicer way of doing this?
 	private final ServerSocketHandler serverSocketHandler;	
-	private final LinkedList<PlayerHandler> playerHandlers;
+	private final List<PlayerHandler> playerHandlers;
 	
 	public static void main(String[] args) {
 		if (args.length != 2) {
@@ -41,10 +41,10 @@ public class HangmanServer {
 	}
 	
 	public HangmanServer(final String word, final int attempts) throws IOException {
-		this.dispatcher = new Dispatcher();
-		this.rules = new HangmanRules<PlayerHandle>(word, attempts); 
-		this.playerHandlers = new LinkedList<PlayerHandler>();
-		this.serverSocketHandler = new ServerSocketHandler();
+		dispatcher = new Dispatcher();
+		rules = new HangmanRules<PlayerHandle>(word, attempts); 
+		playerHandlers = new LinkedList<PlayerHandler>();
+		serverSocketHandler = new ServerSocketHandler();
 		dispatcher.addHandler(serverSocketHandler);
 	}
 	
@@ -75,6 +75,7 @@ public class HangmanServer {
 					rules.removePlayer(player);
 					player = null;
 				}
+				// The socket is already closed when we receive null, so we don't have to close it here
 				playerHandlers.remove(this);
 				dispatcher.removeHandler(this);
 				return;
@@ -87,19 +88,19 @@ public class HangmanServer {
 			}
 			else {
 				if (s.length() != 1)
-					return; // TODO: do something else?
+					return;
 				rules.makeGuess(s.charAt(0));
-				String result = player.getGuessString(s.charAt(0));
+				final String result = player.getGuessString(s.charAt(0));
 				for (HangmanRules<PlayerHandle>.Player player : rules.getPlayers()) {
 					player.playerData.write(result);
 				}
 				
 				if (rules.gameEnded()) {
-					ServerSocketHandle serverSocketHandle = (ServerSocketHandle)serverSocketHandler.getHandle();
+					final ServerSocketHandle serverSocketHandle = (ServerSocketHandle)serverSocketHandler.getHandle();
 					serverSocketHandle.close();
 					dispatcher.removeHandler(serverSocketHandler);
 					for (PlayerHandler handler : playerHandlers) {
-						PlayerHandle handle = (PlayerHandle)handler.getHandle();
+						final PlayerHandle handle = (PlayerHandle)handler.getHandle();
 						handle.close();
 						dispatcher.removeHandler(handler);
 					}

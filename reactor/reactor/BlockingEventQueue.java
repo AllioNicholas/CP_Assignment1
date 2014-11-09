@@ -18,7 +18,7 @@ public class BlockingEventQueue<T> implements BlockingQueue<Event<? extends T>> 
 		if (capacity < 1)
 			throw new IllegalArgumentException("Capacity must be bigger than 0");
 		this.capacity = capacity;
-		queue = new ArrayDeque<Event<? extends T>>(capacity);
+		this.queue = new ArrayDeque<Event<? extends T>>(capacity);
 	}
 
 	public int getSize() {
