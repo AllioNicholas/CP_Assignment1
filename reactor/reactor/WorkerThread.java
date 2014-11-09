@@ -21,7 +21,6 @@ public class WorkerThread<T> extends Thread {
 				queue.put(event);
 			} catch (InterruptedException e) {
 				System.err.println("Worker thread got interrupted. Terminating...");
-				return;
 			}
 			if (value == null || interrupted())
 				return;
@@ -30,5 +29,6 @@ public class WorkerThread<T> extends Thread {
 
 	public void cancelThread() {
 		cancelled = true;
+		interrupt();
 	}
 }
