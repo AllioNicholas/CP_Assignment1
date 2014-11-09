@@ -33,7 +33,9 @@ public class Dispatcher {
 	}
 
 	public <T> void addHandler(EventHandler<T> h) {
-		final WorkerThread<T> wThread = new WorkerThread<T>(h, this.blockingQueue);
+		if (eventHandlerList.contains(h))
+			return;
+		final WorkerThread<T> wThread = new WorkerThread<T>(h, blockingQueue);
 		eventHandlerList.add(h);
 		workerThreadList.add(wThread);
 		wThread.start();
@@ -41,6 +43,8 @@ public class Dispatcher {
 
 	public <T> void removeHandler(EventHandler<T> h) {
 		final int index = eventHandlerList.indexOf(h);
+		if (index == -1)
+			return;
 		workerThreadList.get(index).cancelThread();
 		workerThreadList.remove(index);
 		eventHandlerList.remove(index);
